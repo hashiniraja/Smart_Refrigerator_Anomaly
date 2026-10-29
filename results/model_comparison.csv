@@ -1,0 +1,3 @@
+Model,Precision,Recall,F1-score,Detected Anomalies,Status
+Autoencoder,0.881,0.2721,0.4157,126,Evaluated & Working
+MOMENT,N/A,N/A,N/A,N/A,Requires MSVC C++ Redistributable on Windows

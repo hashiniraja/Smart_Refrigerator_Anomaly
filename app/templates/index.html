@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Refrigerator Temperature Anomaly Detection</title>
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="brand">
+                <i class="fa-solid fa-snowflake brand-icon"></i>
+                <h2>Smart Refrigerator Temperature Anomaly Detection</h2>
+            </div>
+            <div class="prototype-badge">
+                <i class="fa-solid fa-laptop-code"></i>
+                <span>Software Prototype (Simulated Data)</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Body -->
+    <main class="dashboard-container">
+
+        <!-- Alert Banner (Hidden by default, triggered on Anomaly) -->
+        <div id="alertBanner" class="alert-banner hidden">
+            <i class="fa-solid fa-triangle-exclamation alert-icon"></i>
+            <span id="alertMessage">⚠ Temperature anomaly detected. Please check the refrigerator.</span>
+        </div>
+
+        <!-- Top Summary Cards Section -->
+        <section class="summary-cards">
+            <!-- Card 1: Current Temperature -->
+            <div class="card card-temp">
+                <div class="card-header">
+                    <span class="card-title">Current Temperature</span>
+                    <i class="fa-solid fa-temperature-half card-icon"></i>
+                </div>
+                <div class="card-body">
+                    <span id="currentTemp" class="card-value">--.- °C</span>
+                    <span class="card-subtext">Data Source: Simulated Temperature Data</span>
+                </div>
+            </div>
+
+            <!-- Card 2: Current Status -->
+            <div class="card card-status">
+                <div class="card-header">
+                    <span class="card-title">Current Status</span>
+                    <i class="fa-solid fa-shield-halved card-icon"></i>
+                </div>
+                <div class="card-body">
+                    <span id="currentStatus" class="status-badge status-normal">NORMAL</span>
+                    <span class="card-subtext">Prediction Method: Autoencoder</span>
+                </div>
+            </div>
+
+            <!-- Card 3: Anomaly Score -->
+            <div class="card card-score">
+                <div class="card-header">
+                    <span class="card-title">Anomaly Score (MSE)</span>
+                    <i class="fa-solid fa-chart-line card-icon"></i>
+                </div>
+                <div class="card-body">
+                    <span id="anomalyScore" class="card-value">0.000000</span>
+                    <span id="scoreThreshold" class="card-subtext">Threshold: 0.008568</span>
+                </div>
+            </div>
+
+            <!-- Card 4: Last Updated -->
+            <div class="card card-time">
+                <div class="card-header">
+                    <span class="card-title">Last Updated</span>
+                    <i class="fa-solid fa-clock card-icon"></i>
+                </div>
+                <div class="card-body">
+                    <span id="lastUpdated" class="card-value-small">--:--:--</span>
+                    <span class="card-subtext">Timezone: Asia/Kolkata</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Simulation Control Bar -->
+        <div class="control-bar">
+            <button id="refreshBtn" class="btn btn-primary">
+                <i class="fa-solid fa-rotate"></i> Refresh Data
+            </button>
+            <button id="toggleAutoBtn" class="btn btn-secondary">
+                <i class="fa-solid fa-play"></i> Start Auto Simulation
+            </button>
+            <span class="control-disclaimer">
+                <i class="fa-solid fa-info-circle"></i>
+                Simulated temperature data (Software Prototype - No ESP32 hardware attached).
+            </span>
+        </div>
+
+        <!-- Charts Section -->
+        <section class="charts-grid">
+            <!-- Chart 1: Temperature Over Time -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><i class="fa-solid fa-chart-area"></i> Temperature Trend</h3>
+                    <span class="chart-badge">14-Day Simulated Sequence</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="tempChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 2: Anomaly Score Over Time -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3><i class="fa-solid fa-wave-square"></i> Anomaly Score Trend</h3>
+                    <span class="chart-badge">Autoencoder MSE vs Threshold</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="scoreChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Model Comparison Section -->
+        <section class="section-block">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-scale-balanced"></i> AI Model Performance Comparison</h2>
+                <span class="section-subtext">Measured Experimental Metrics (Autoencoder Baseline vs. MOMENT Foundation Model)</span>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="data-table" id="comparisonTable">
+                    <thead>
+                        <tr>
+                            <th>Model Architecture</th>
+                            <th>Precision</th>
+                            <th>Recall</th>
+                            <th>F1-Score</th>
+                            <th>Detected Anomalies</th>
+                            <th>Evaluation Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparisonTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center">Loading model metrics...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="comparison-note">
+                <i class="fa-solid fa-circle-info"></i>
+                <strong>Note:</strong> Performance metrics reflect empirical experimental results measured on the dataset. Neither model is ranked as absolute "best".
+            </p>
+        </section>
+
+        <!-- Recent Simulated Temperature Readings Table -->
+        <section class="section-block">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-table-list"></i> Recent Simulated Temperature Logs</h2>
+                <span class="section-subtext">Historical timestamps represent simulated reading sequence times</span>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Historical Simulated Timestamp</th>
+                            <th>Temperature (°C)</th>
+                            <th>Status</th>
+                            <th>Anomaly Score (MSE)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentReadingsBody">
+                        <!-- Populated dynamically via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Project Information Section -->
+        <section class="section-block project-info">
+            <div class="section-header">
+                <h2><i class="fa-solid fa-book-open"></i> Project Information & Future IoT Roadmap</h2>
+            </div>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4><i class="fa-solid fa-triangle-exclamation"></i> Problem Statement</h4>
+                    <p>Temperature abnormalities inside a refrigerator spoil food and cause energy inefficiency. The system detects unusual temperature patterns early.</p>
+                </div>
+                <div class="info-card">
+                    <h4><i class="fa-solid fa-network-wired"></i> Autoencoder Baseline</h4>
+                    <p>TensorFlow/Keras Deep Neural Network trained on normal temperature sequences. Predicts 10-value window reconstructions and flags anomalies via learned reconstruction error thresholds.</p>
+                </div>
+                <div class="info-card">
+                    <h4><i class="fa-solid fa-brain"></i> MOMENT Model</h4>
+                    <p>Open-source foundation model for time-series analysis (CMU Auton Lab) pre-trained on multi-domain time-series datasets, evaluated for zero-shot time-series anomaly detection.</p>
+                </div>
+                <div class="info-card">
+                    <h4><i class="fa-solid fa-microchip"></i> Future Hardware Integration</h4>
+                    <p>In future physical deployment phases, an ESP32 microcontroller with a DS18B20 digital temperature sensor and piezo buzzer will transmit real-time telemetry to this Flask API.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Smart Refrigerator Temperature Anomaly Detection System &copy; 2026 | B.E. Computer Science Prototype</p>
+    </footer>
+
+    <!-- External JavaScript -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
